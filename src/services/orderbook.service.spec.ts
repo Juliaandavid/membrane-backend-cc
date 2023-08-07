@@ -1,28 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Server } from 'ws';
-import mockData from '../../test/mockData.json';
 import { OrderbookService } from './orderbook.service';
 import { SymbolsService } from './symbols.service';
-import { BITFINEX_ORDERBOOKS_WS, BITFINEX_PUBLIC_HTTP } from '../types/providers';
+import {
+  BITFINEX_ORDERBOOKS_WS,
+  BITFINEX_PUBLIC_HTTP,
+} from '../types/providers';
 
 describe('OrderbookService', () => {
-  let server: Server;
   let orderbookService: OrderbookService;
   let symbolsService: SymbolsService;
   let configService: ConfigService;
 
   beforeAll(async () => {
-    server = new Server({ port: 8081 });
-    server.on('connection', (socket) => {
-      socket.on('message', (data) => {
-        const payload = {};
-        // if (payload.event === 'subscribe') {
-        //   socket.send(JSON.stringify(mockData.suscribed));
-        // }
-      });
-    });
-
     const module: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
       providers: [
@@ -41,6 +31,7 @@ describe('OrderbookService', () => {
           provide: BITFINEX_ORDERBOOKS_WS,
           useValue: {
             on: jest.fn(),
+            send: jest.fn(),
           },
         },
       ],
@@ -49,10 +40,6 @@ describe('OrderbookService', () => {
     orderbookService = module.get<OrderbookService>(OrderbookService);
     symbolsService = module.get<SymbolsService>(SymbolsService);
     configService = module.get<ConfigService>(ConfigService);
-  });
-
-  afterAll(() => {
-    server.close();
   });
 
   describe('addPair', () => {
@@ -69,9 +56,10 @@ describe('OrderbookService', () => {
       jest.spyOn(configService, 'get').mockReturnValue('BTCUSD,ETHUSD');
 
       const pair = 'BTCUSD';
+      setTimeout(() => console.log('asdasdas'), 2000);
       await orderbookService.addPair(pair);
 
-      expect(orderbookService.pairExists(pair)).toBeCalled();
+      expect(orderbookService.pairExists).toBeCalled();
     }, 30000);
   });
 

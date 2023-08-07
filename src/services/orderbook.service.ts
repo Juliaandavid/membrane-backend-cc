@@ -30,9 +30,14 @@ export class OrderbookService {
     this.ws.on('open', this.onOpen.bind(this));
     this.ws.on('message', this.onMessage.bind(this));
     this.ws.on('error', console.error);
-    // setInterval(() => {
-    //   console.log(new Date().getTime(), JSON.stringify(this.orderBooks));
-    // }, 10000);
+    setInterval(() => {
+      console.log(
+        new Date().getTime(),
+        '[orderbooks]',
+        JSON.stringify(this.channels),
+        JSON.stringify(this.orderBooks),
+      );
+    }, 10000);
   }
 
   private onOpen() {
